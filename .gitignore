@@ -105,4 +105,7 @@ venv.bak/
 
 #config file with keys
 *.keys
+*.json
+*.csv
+
 
