@@ -46,22 +46,23 @@ def main():
 	dbx = dropbox.Dropbox(TOKEN)
 	print "checking dropbox file list..."
 	listing = list_folder(dbx)
-	print "found ", len(listing), " files/folders"
+	print('Received a TOTAL of %s files from list_folder' % len(listing)) 
+
 
 	# for field, possible_values in listing.iteritems():
 	# 	print field, ": " , possible_values
 
-	# save to csv file
-	print "writing file..."
-	# print "keys: ", listing[0].keys()
-	with open('dropbox.csv', 'w') as csvfile:
-		w = csv.DictWriter(csvfile, listing[0].keys())
-		# w = csv.DictWriter(sys.stderr, listing[0].keys())
-		w.writeheader()
+	with stopwatch('print_csv'):
+		# save to csv file
+		print "writing file..."
+		# print "keys: ", listing[0].keys()
+		with open('dropbox.csv', 'w') as csvfile:
+			w = csv.DictWriter(csvfile, listing[0].keys())
+			# w = csv.DictWriter(sys.stderr, listing[0].keys())
+			w.writeheader()
 
-		for item in listing:
-			w.writerow(item)
-    	# writer.writerow({'first_name': 'Baked', 'last_name': 'Beans'})
+			for item in listing:
+				w.writerow(item)
 
 	return;
 
@@ -71,9 +72,6 @@ def read_token(key):
 	configParser = ConfigParser.RawConfigParser()   
 	configFilePath = r'./dropbox-gdrive.keys'
 	configParser.read(configFilePath)
-
-	# dropbox_token = configParser.get('TOKENS', key)
-	# print dropbox_token
 
 	return configParser.get('TOKENS', key).strip();
 
@@ -90,18 +88,20 @@ def list_folder(dbx, folder='', subfolder=''):
     try:
         with stopwatch('list_folder'):
         	# create the list of results, because of many possible calls with cursor
+        	files = 0
         	results = []
         	res = dbx.files_list_folder(path,True,True)
         	results.append(res)
         	while (res.has_more):
-        		print "There are more files to read... "
+        		files += len(res.entries)
+       			print('Received +%s files from list_folder(), com total acumulado de %s' % (len(res.entries), files)) 
         		res = dbx.files_list_folder_continue(res.cursor)
         		results.append(res)
     except dropbox.exceptions.ApiError as err:
         print('Folder listing failed for', path, '-- assumed empty:', err)
         return {}
     else:
-        l = [] # list
+        l = [] # list of files
         for res in results:
         	for entry in res.entries:
 				d = {} # dict
@@ -109,9 +109,32 @@ def list_folder(dbx, folder='', subfolder=''):
 				d["name"] = entry.name
 				d["path_lower"] = entry.path_lower
 				d["path_display"] = entry.path_display
-				d["parent_shared_folder_id"] = entry.parent_shared_folder_id
-				d["sharing_info"] = entry.sharing_info
 				d["property_groups"] = entry.property_groups
+				try:
+				    d["size"] = entry.size
+				except AttributeError:
+					d["size"] = 0
+
+				try:
+					d["client_modified"] = entry.client_modified
+				except AttributeError:
+					d["client_modified"] = ""
+
+				try:
+					d["server_modified"] = entry.server_modified
+				except AttributeError:
+					d["server_modified"] = ""
+
+				try:
+					d["rev"] = entry.rev
+				except AttributeError:
+					d["rev"] = ""
+
+				try:
+					d["content_hash"] = entry.sharing_info.content_hash
+				except AttributeError:
+					d["content_hash"] = ""								
+
 				l.append(d)
 
         return l
@@ -125,6 +148,13 @@ def stopwatch(message):
     finally:
         t1 = time.time()
         print('Total elapsed time for %s: %.3f' % (message, t1 - t0))
+
+def dirmore(instance):
+    visible = dir(instance)
+    visible += [a for a in set(dir(type)).difference(visible)
+                if hasattr(instance, a)]
+    return sorted(visible)
+
 
 if __name__ == '__main__':
     main()
