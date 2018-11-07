@@ -131,7 +131,7 @@ def list_folder(dbx, folder='', subfolder=''):
 					d["rev"] = ""
 
 				try:
-					d["content_hash"] = entry.sharing_info.content_hash
+					d["content_hash"] = entry.content_hash
 				except AttributeError:
 					d["content_hash"] = ""								
 

@@ -21,7 +21,7 @@ def main():
 	print "Start reading files. It may take some time to get a response from server..."
 	# Auto-iterate through all files that matches this query
 	# file_list = drive.ListFile({'q': "'root' in parents"}).GetList()
-	# file_list = drive.ListFile({'q': ''}).GetList()
+	file_list = drive.ListFile({'q': ''}).GetList()
 
 	keys = [] # list
 	l = [] # list
