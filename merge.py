@@ -77,8 +77,6 @@ def main(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merge
 	with stopwatch('merge_files'):
 		keys = [] # list of keys in merged dict
 		for dropbox_file in dropbox_files:
-			if (len(merged_files) > 10):
-				break
 			if (dropbox_file['dropbox_size'] == 0):
 				# SKIP - it is a folder
 				logger.warning("Skipping dropbox element for being a folder (0 bytes size): %s", dropbox_file['dropbox_filename'])
