@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # encoding=utf8
+# -*- coding: utf-8 -*-
 import sys
 import os
 import contextlib
@@ -8,8 +9,9 @@ import time
 import unicodedata
 import ConfigParser
 import json
+import logging
 import pprint
-import csv
+import unicodecsv as csv
 reload(sys)
 sys.setdefaultencoding('utf8')
 
@@ -23,7 +25,7 @@ from dropbox import DropboxOAuth2FlowNoRedirect
 
 
 # OAuth2 access token.  TODO: login etc.
-def main():
+def main(csv_filename = "dropbox.csv"):
 	# auth_flow = DropboxOAuth2FlowNoRedirect("pn25i8wmcbhoyrz", "nvk11k789ifdfbn")
 
 	# authorize_url = auth_flow.start()
@@ -41,12 +43,11 @@ def main():
 	# dbx = dropbox.Dropbox(oauth_result.access_token)
 
 	TOKEN = read_token("DROPBOX_TOKEN")
-	print "Token: " + TOKEN
 
 	dbx = dropbox.Dropbox(TOKEN)
-	print "checking dropbox file list..."
+	logger.info("Start reading files from server. It may take some time to get a response from server, depending on how many files you have.") 
 	listing = list_folder(dbx)
-	print('Received a TOTAL of %s files from list_folder' % len(listing)) 
+	logger.info('Received a TOTAL of %s files from list_folder' % len(listing)) 
 
 
 	# for field, possible_values in listing.iteritems():
@@ -54,10 +55,9 @@ def main():
 
 	with stopwatch('print_csv'):
 		# save to csv file
-		print "writing file..."
-		# print "keys: ", listing[0].keys()
-		with open('dropbox.csv', 'w') as csvfile:
-			w = csv.DictWriter(csvfile, listing[0].keys())
+		logger.info("Writing %s lines into the CSV file: %s", len(listing),csv_filename)
+		with open(csv_filename, 'w') as csvfile:
+			w = csv.DictWriter(csvfile, listing[0].keys(), encoding='utf-8')
 			# w = csv.DictWriter(sys.stderr, listing[0].keys())
 			w.writeheader()
 
@@ -65,7 +65,6 @@ def main():
 				w.writerow(item)
 
 	return;
-
 
 
 def read_token(key):
@@ -94,11 +93,11 @@ def list_folder(dbx, folder='', subfolder=''):
         	results.append(res)
         	while (res.has_more):
         		files += len(res.entries)
-       			print('Received +%s files from list_folder(), com total acumulado de %s' % (len(res.entries), files)) 
+       			logger.info('Received +%s files from list_folder(), adding to a total of %s',len(res.entries), files)
         		res = dbx.files_list_folder_continue(res.cursor)
         		results.append(res)
     except dropbox.exceptions.ApiError as err:
-        print('Folder listing failed for', path, '-- assumed empty:', err)
+        logger.critical('Folder listing failed for', path, '-- assumed empty:', err)
         return {}
     else:
         l = [] # list of files
@@ -147,7 +146,7 @@ def stopwatch(message):
         yield
     finally:
         t1 = time.time()
-        print('Total elapsed time for %s: %.3f' % (message, t1 - t0))
+        logger.info('Total elapsed time for %s: %.3f', message, t1 - t0)
 
 def dirmore(instance):
     visible = dir(instance)
@@ -157,4 +156,20 @@ def dirmore(instance):
 
 
 if __name__ == '__main__':
-    main()
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)
+
+	# # create console handler and set level to debug
+	streamHandler = logging.StreamHandler()
+	streamHandler.setLevel(logging.INFO)
+	# # create formatter
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	# # add formatter to ch
+	streamHandler.setFormatter(formatter)
+
+	# # add handler to logger
+	logger.addHandler(streamHandler)
+
+	
+	# calls the main function	
+	main()
