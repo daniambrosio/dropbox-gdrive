@@ -37,7 +37,7 @@ def main(csv_filename = "gdrive.csv"):
 	logger.info('Received a TOTAL of %s files from Files.list()',len(l)) 
 
 	with stopwatch('print_csv'):
-		logger.info("Writing %s lines into the CSV file: %s", len(file_list),csv_filename)
+		logger.info("Writing %s lines into the CSV file: %s", len(l),csv_filename)
 		with open(csv_filename, 'w') as csvfile:
 			w = csv.DictWriter(csvfile, keys, encoding='utf-8')
 			w.writeheader()
