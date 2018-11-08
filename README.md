@@ -19,3 +19,12 @@ Run the following command to install the library using pip:
 
 pip install --upgrade google-api-python-client oauth2client
 
+
+https://developers.google.com/api-client-library/python/apis/drive/v2
+
+https://developers.google.com/drive/api/v3/quickstart/python
+
+https://developers.google.com/api-client-library/python/
+
+# TOOLS
+sudo pip install unicodecsv
