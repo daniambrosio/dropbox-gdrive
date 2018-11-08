@@ -11,7 +11,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def main():
+def dropboxgdrive():
 		
 
 	return;
