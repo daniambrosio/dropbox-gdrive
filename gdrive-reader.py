@@ -4,6 +4,7 @@
 import contextlib
 import time
 import csv
+import logging
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import sys
@@ -11,35 +12,34 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def main():
+def main(csv_filename = "gdrive.csv"):
 
+	logger.info("Run GDrive authentication. Look for the OAuth window on your browser.") 
 	gauth = GoogleAuth()
 	gauth.LocalWebserverAuth()
 
 	drive = GoogleDrive(gauth)
 
-	print "Start reading files. It may take some time to get a response from server..."
-	# Auto-iterate through all files that matches this query
+	logger.info("Start reading files from server. It may take some time to get a response from server, depending on how many files you have.") 
 	# file_list = drive.ListFile({'q': "'root' in parents"}).GetList()
-	file_list = drive.ListFile({'q': ''}).GetList()
+	# file_list = drive.ListFile({'q': ''}).GetList()
 
 	keys = [] # list
 	l = [] # list
 	with stopwatch('list_folder'):
+		# Auto-iterate through all files that matches this query
 		for file_list in drive.ListFile({'q': "mimeType != 'application/vnd.google-apps.folder' and trashed = false", 'maxResults': 2000}):
-			print('Received +%s files from Files.list(), com total acumulado de %s' % (len(file_list), len(l))) 
+			logger.info('Received +%s files from Files.list(), com total acumulado de %s',len(file_list), len(l))
 			for entry in file_list:
 				keys = list(set(entry.keys() + keys))
 				l.append(entry)
 
-	print('Received a TOTAL of %s files from Files.list()' % len(l)) 
+	logger.info('Received a TOTAL of %s files from Files.list()',len(l)) 
 
 	with stopwatch('print_csv'):
-		print "writing file..."
-		# print "keys: ", listing[0].keys()
-		with open('gdrive.csv', 'w') as csvfile:
-			w = csv.DictWriter(csvfile, keys)
-			# w = csv.DictWriter(sys.stderr, listing[0].keys())
+		logger.info("Writing %s lines into the CSV file: %s", len(file_list),csv_filename)
+		with open(csv_filename, 'w') as csvfile:
+			w = csv.DictWriter(csvfile, keys, encoding='utf-8')
 			w.writeheader()
 
 			for item in l:
@@ -57,8 +57,24 @@ def stopwatch(message):
         yield
     finally:
         t1 = time.time()
-        print('Total elapsed time for %s: %.3f' % (message, t1 - t0))
+        logger.info('Total elapsed time for %s: %.3f', message, t1 - t0)
 
 
 if __name__ == '__main__':
-    main()
+	logger = logging.getLogger(__name__)
+	logger.setLevel(logging.DEBUG)
+
+	# # create console handler and set level to debug
+	streamHandler = logging.StreamHandler()
+	streamHandler.setLevel(logging.INFO)
+	# # create formatter
+	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	# # add formatter to ch
+	streamHandler.setFormatter(formatter)
+
+	# # add handler to logger
+	logger.addHandler(streamHandler)
+
+	
+	# calls the main function	
+	main()
