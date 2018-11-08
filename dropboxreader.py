@@ -3,45 +3,18 @@
 # -*- coding: utf-8 -*-
 import sys
 import os
-import contextlib
-import datetime
-import time
-import unicodedata
 import ConfigParser
 import json
 import logging
-import pprint
-import unicodecsv as csv
+import dropbox
+from util import *
+from dropbox import DropboxOAuth2FlowNoRedirect
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-if sys.version.startswith('2'):
-    input = raw_input  # noqa: E501,F821; pylint: disable=redefined-builtin,undefined-variable,useless-suppression
-
-import dropbox
-from dropbox import DropboxOAuth2FlowNoRedirect
-
-
-
-# OAuth2 access token.  TODO: login etc.
 def dropboxreader(csv_filename = "dropbox.csv"):
-	# auth_flow = DropboxOAuth2FlowNoRedirect("pn25i8wmcbhoyrz", "nvk11k789ifdfbn")
-
-	# authorize_url = auth_flow.start()
-	# print "1. Go to: " + authorize_url
-	# print "2. Click \"Allow\" (you might have to log in first)."
-	# print "3. Copy the authorization code."
-	# auth_code = raw_input("Enter the authorization code here: ").strip()
-
-	# try:
-	#     oauth_result = auth_flow.finish(auth_code)
-	# except Exception, e:
-	#     print('Error: %s' % (e,))
-	#     return
-
-	# dbx = dropbox.Dropbox(oauth_result.access_token)
-
+	# Will read the Dropbox token from a configuration file
 	TOKEN = read_token("DROPBOX_TOKEN")
 
 	dbx = dropbox.Dropbox(TOKEN)
@@ -49,22 +22,11 @@ def dropboxreader(csv_filename = "dropbox.csv"):
 	listing = list_folder(dbx)
 	logger.info('Received a TOTAL of %s files from list_folder' % len(listing)) 
 
+	written_rows = write_dict_to_csv(csv_filename,listing,listing[0].keys())
+	if written_rows > 0:
+		logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
 
-	# for field, possible_values in listing.iteritems():
-	# 	print field, ": " , possible_values
-
-	with stopwatch('print_csv'):
-		# save to csv file
-		logger.info("Writing %s lines into the CSV file: %s", len(listing),csv_filename)
-		with open(csv_filename, 'w') as csvfile:
-			w = csv.DictWriter(csvfile, listing[0].keys(), encoding='utf-8')
-			# w = csv.DictWriter(sys.stderr, listing[0].keys())
-			w.writeheader()
-
-			for item in listing:
-				w.writerow(item)
-
-	return;
+	return written_rows;
 
 
 def read_token(key):
@@ -138,22 +100,6 @@ def list_folder(dbx, folder='', subfolder=''):
 
         return l
 
-@contextlib.contextmanager
-def stopwatch(message):
-    """Context manager to print how long a block of code took."""
-    t0 = time.time()
-    try:
-        yield
-    finally:
-        t1 = time.time()
-        logger.info('Total elapsed time for %s: %.3f', message, t1 - t0)
-
-def dirmore(instance):
-    visible = dir(instance)
-    visible += [a for a in set(dir(type)).difference(visible)
-                if hasattr(instance, a)]
-    return sorted(visible)
-
 
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
@@ -170,6 +116,5 @@ if __name__ == '__main__':
 	# # add handler to logger
 	logger.addHandler(streamHandler)
 
-	
 	# calls the main function	
 	dropboxreader()

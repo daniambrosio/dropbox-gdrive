@@ -7,12 +7,13 @@ import datetime
 import time
 import unicodecsv as csv
 import logging
+import dropboxreader
 reload(sys)
 sys.setdefaultencoding('utf8')
 
 
 def dropboxgdrive():
-		
+	dropboxreader()		
 
 	return;
 
@@ -45,4 +46,4 @@ if __name__ == '__main__':
 
 	
 	# calls the main function
-	main()
+	dropboxgdrive()

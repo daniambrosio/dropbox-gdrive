@@ -38,7 +38,7 @@ def gdrivereader(csv_filename = "gdrive.csv"):
 	if written_rows > 0:
 		logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
 
-	return;
+	return written_rows;
 
 
 if __name__ == '__main__':
