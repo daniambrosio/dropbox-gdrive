@@ -5,7 +5,7 @@ import os
 import contextlib
 import datetime
 import time
-import csv
+import unicodecsv as csv
 import logging
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -77,6 +77,8 @@ def main(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merge
 	with stopwatch('merge_files'):
 		keys = [] # list of keys in merged dict
 		for dropbox_file in dropbox_files:
+			if (len(merged_files) > 10):
+				break
 			if (dropbox_file['dropbox_size'] == 0):
 				# SKIP - it is a folder
 				logger.warning("Skipping dropbox element for being a folder (0 bytes size): %s", dropbox_file['dropbox_filename'])
@@ -101,9 +103,9 @@ def main(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merge
 		keys = sorted(keys)
 
 		with stopwatch('write_csv'):
-			logger.info("writing %s lines from memory into CSV merged file",merged_files.len)
+			logger.info("writing %s lines from memory into CSV merged file",len(merged_files))
 			with open(merged_filename, 'w') as csvfile:
-				w = csv.DictWriter(csvfile, keys)
+				w = csv.DictWriter(csvfile, keys, encoding='utf-8')
 				w.writeheader()
 
 				for item in merged_files:
