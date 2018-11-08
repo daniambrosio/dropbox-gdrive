@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 import contextlib
 import time
-import csv
+import unicodecsv as csv
 import logging
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
@@ -29,7 +29,7 @@ def main(csv_filename = "gdrive.csv"):
 	with stopwatch('list_folder'):
 		# Auto-iterate through all files that matches this query
 		for file_list in drive.ListFile({'q': "mimeType != 'application/vnd.google-apps.folder' and trashed = false", 'maxResults': 2000}):
-			logger.info('Received +%s files from Files.list(), com total acumulado de %s',len(file_list), len(l))
+			logger.info('Received +%s files from Files.list(), adding to a total of %s',len(file_list), len(l))
 			for entry in file_list:
 				keys = list(set(entry.keys() + keys))
 				l.append(entry)
