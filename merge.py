@@ -11,7 +11,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def main(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merged_filename = 'merged.csv', delimiter_char = ","):
+def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merged_filename = 'merged.csv', delimiter_char = ","):
 
 	dropbox_files = [] # list of files
 	gdrive_files = [] # list of files
@@ -146,4 +146,4 @@ if __name__ == '__main__':
 
 	
 	# calls the main function
-	main()
+	merge()

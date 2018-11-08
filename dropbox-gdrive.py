@@ -12,7 +12,6 @@ sys.setdefaultencoding('utf8')
 
 
 def main():
-
 		
 
 	return;

@@ -25,7 +25,7 @@ from dropbox import DropboxOAuth2FlowNoRedirect
 
 
 # OAuth2 access token.  TODO: login etc.
-def main(csv_filename = "dropbox.csv"):
+def dropboxreader(csv_filename = "dropbox.csv"):
 	# auth_flow = DropboxOAuth2FlowNoRedirect("pn25i8wmcbhoyrz", "nvk11k789ifdfbn")
 
 	# authorize_url = auth_flow.start()
@@ -172,4 +172,4 @@ if __name__ == '__main__':
 
 	
 	# calls the main function	
-	main()
+	dropboxreader()
