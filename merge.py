@@ -9,20 +9,9 @@ import csv
 import logging
 reload(sys)
 sys.setdefaultencoding('utf8')
-from operator import itemgetter
 
 
-if sys.version.startswith('2'):
-    input = raw_input  # noqa: E501,F821; pylint: disable=redefined-builtin,undefined-variable,useless-suppression
-
-
-def main():
-
-	dropbox_filename = 'dropbox.csv'
-	gdrive_filename = 'gdrive.csv'
-	merged_filename = 'merged.csv'
-	delimiter_char = ","
-
+def main(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merged_filename = 'merged.csv', delimiter_char = ","):
 
 	dropbox_files = [] # list of files
 	gdrive_files = [] # list of files
@@ -30,7 +19,6 @@ def main():
 
 	# Processa o Dropbox
 	filename = dropbox_filename
-	row_count = 0
 	logger.info("Pocessando arquivo %s" %(filename))
 	with stopwatch('process_dropbox'):
 		with open(filename, 'rU') as f:
@@ -46,20 +34,15 @@ def main():
 		        	d["dropbox_size"] = int(row[9])
 		        	d["dropbox_path_lower"] = row[4]
 		        	dropbox_files.append(d)
-		        	# logger.debug("Dropbox file appended: %s",d)
+		        	logger.debug("Dropbox file appended: %s",d)
 
-		        	row_count += 1
 		    except csv.Error as e:
 		        sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
 
-		logger.info("Linhas no arquivo %s (%4d)" % (filename,row_count))
-		# logger.info("Ordenando lista do arquivo %s" %(filename))
-
-		# sorted_dropbox_files = sorted(dropbox_files, key=itemgetter('dropbox_filename')) 
+		logger.info("Linhas no arquivo %s (%4d)" % (filename,len(dropbox_files)))
 
 	# Processa o GDrive
 	filename = gdrive_filename
-	row_count = 0
 	logger.info("Pocessando arquivo %s" %(filename))
 	with stopwatch('process_gdrive'):
 		with open(filename, 'rU') as f:
@@ -82,14 +65,11 @@ def main():
 		        	d["gdrive_size"] = int(row[46]) if row[46] != '' else 0
 		        	d["gdrive_md5"] = row[33]
 		        	gdrive_files.append(d)
-		        	row_count += 1
+		        	logger.debug("GDrive file appended: %s",d)
 		    except csv.Error as e:
 		        sys.exit('file %s, line %d: %s' % (filename, reader.line_num, e))
 
-		logger.info("Linhas no arquivo %s (%4d)" % (filename,row_count))
-		# logger.info("Ordenando lista do arquivo %s" %(filename))
-
-		# sorted_gdrive_files = sorted(gdrive_files, key=itemgetter('gdrive_filename')) 
+		logger.info("Linhas no arquivo %s (%4d)" % (filename,len(gdrive_files)))
 
 	# use the dropbox list as reference and search for files in gdrive
 	filename = merged_filename
@@ -99,18 +79,19 @@ def main():
 		for dropbox_file in dropbox_files:
 			if (dropbox_file['dropbox_size'] == 0):
 				# SKIP - it is a folder
-				logger.debug("Skipping dropbox element for being a folder (0 bytes size): %s", dropbox_file['dropbox_filename'])
+				logger.warning("Skipping dropbox element for being a folder (0 bytes size): %s", dropbox_file['dropbox_filename'])
+				pass
 			else:
 				search_result = search(dropbox_file['dropbox_filename'], 'gdrive_filename', gdrive_files)
-				# logger.debug("Found in search: %s",search_result)
-				merge = dropbox_file # copy the dropbox dict 
 				if len(search_result) < 1:
-					logger.warning("not found (%s)",dropbox_file['dropbox_filename'])
+					logger.warning("Not found in search (%s)",dropbox_file['dropbox_filename'])
+					merge = dropbox_file # copy the dropbox dict, because even if no success in search, the dropbox file should go to merge
 				for result in search_result:
+					merge = dropbox_file # copy the dropbox dict, because even if no success in search, the dropbox file should go to merge
 					# normally there whill only be ONE result
 					merge['search_result_count'] = len(search_result)
 					merge['search_result_size_match'] = (result['gdrive_size'] == dropbox_file['dropbox_size'])
-					merge.update(result)
+					merge.update(result) # add the gdrive data found to the merge, related to the dropbox search
 					merged_files.append(merge)
 					# logger.debug('Merged element: %s',merge)
 					keys = list(set(merge.keys() + keys))
@@ -120,23 +101,22 @@ def main():
 		keys = sorted(keys)
 
 		with stopwatch('write_csv'):
-			logger.info("writing CSV merged file")
+			logger.info("writing %s lines from memory into CSV merged file",merged_files.len)
 			with open(merged_filename, 'w') as csvfile:
 				w = csv.DictWriter(csvfile, keys)
 				w.writeheader()
 
 				for item in merged_files:
 					w.writerow(item)
-
-
 		
 
 	return;
 
-# this method will return a list of dicts found 
+# this method will return a list of dicts found comparing the name sith the content of the key
 def search(name, key, files):
-	# logger.debug("searching... %s",name)
+	logger.debug("searching '%s' value using key '%s'...",name,key)
 	return [element for element in files if element[key] == name]
+
 
 @contextlib.contextmanager
 def stopwatch(message):
@@ -153,24 +133,17 @@ if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
 	logger.setLevel(logging.DEBUG)
 
+	# # create console handler and set level to debug
 	streamHandler = logging.StreamHandler()
-	streamHandler.setLevel(logging.DEBUG)
+	streamHandler.setLevel(logging.INFO)
+	# # create formatter
 	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+	# # add formatter to ch
 	streamHandler.setFormatter(formatter)
 
+	# # add handler to logger
 	logger.addHandler(streamHandler)
-	# # create console handler and set level to debug
-	# ch = logging.StreamHandler()
-	# ch.setLevel(logging.DEBUG)
 
-	# # create formatter
-	# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-	# # add formatter to ch
-	# ch.setFormatter(formatter)
-
-	# # add ch to logger
-	# logger.addHandler(ch)
-
+	
 	# calls the main function
 	main()
