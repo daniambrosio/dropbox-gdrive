@@ -1,10 +1,8 @@
 #!/usr/bin/python
 # encoding=utf8
 # -*- coding: utf-8 -*-
-import contextlib
-import time
-import unicodecsv as csv
 import logging
+from util import *
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 import sys
@@ -13,7 +11,6 @@ sys.setdefaultencoding('utf8')
 
 
 def main(csv_filename = "gdrive.csv"):
-
 	logger.info("Run GDrive authentication. Look for the OAuth window on your browser.") 
 	gauth = GoogleAuth()
 	gauth.LocalWebserverAuth()
@@ -33,31 +30,15 @@ def main(csv_filename = "gdrive.csv"):
 			for entry in file_list:
 				keys = list(set(entry.keys() + keys))
 				l.append(entry)
+			if len(l) > 300:
+				break
 
 	logger.info('Received a TOTAL of %s files from Files.list()',len(l)) 
-
-	with stopwatch('print_csv'):
-		logger.info("Writing %s lines into the CSV file: %s", len(l),csv_filename)
-		with open(csv_filename, 'w') as csvfile:
-			w = csv.DictWriter(csvfile, keys, encoding='utf-8')
-			w.writeheader()
-
-			for item in l:
-				w.writerow(item)
+	written_rows = write_dict_to_csv(csv_filename,l,keys)
+	if written_rows > 0:
+		logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
 
 	return;
-
-
-
-@contextlib.contextmanager
-def stopwatch(message):
-    """Context manager to print how long a block of code took."""
-    t0 = time.time()
-    try:
-        yield
-    finally:
-        t1 = time.time()
-        logger.info('Total elapsed time for %s: %.3f', message, t1 - t0)
 
 
 if __name__ == '__main__':
