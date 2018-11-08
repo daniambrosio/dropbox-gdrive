@@ -10,7 +10,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def main(csv_filename = "gdrive.csv"):
+def gdrivereader(csv_filename = "gdrive.csv"):
 	logger.info("Run GDrive authentication. Look for the OAuth window on your browser.") 
 	gauth = GoogleAuth()
 	gauth.LocalWebserverAuth()
@@ -58,4 +58,4 @@ if __name__ == '__main__':
 
 	
 	# calls the main function	
-	main()
+	gdrivereader()
