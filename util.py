@@ -28,6 +28,11 @@ def write_dict_to_csv(csv_filename = "dict.csv", list_dict = [{"no_key","no_valu
 
 	return written_rows
 
+# this method will return a list of dicts found comparing the name sith the content of the key
+def search(name, key, files):
+	logger.debug("searching '%s' value using key '%s'...",name,key)
+	return [element for element in files if element[key] == name]
+
 
 @contextlib.contextmanager
 def stopwatch(message):

@@ -11,7 +11,8 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 
-def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merged_filename = 'merged.csv', delimiter_char = ","):
+# This code needs that dropboxreader.py and gdrivereader.py are run before, so the CSVs files are available 
+def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merged_filename = 'merged.csv', notfound_filename = "notfound.csv", delimiter_char = ","):
 
 	dropbox_files = [] # list of files
 	gdrive_files = [] # list of files
@@ -76,6 +77,7 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 	logger.info("analysing and merging both files into %s" %(filename))
 	with stopwatch('merge_files'):
 		keys = [] # list of keys in merged dict
+		not_found = [] # list of dropbox files not found in gdrive
 		for dropbox_file in dropbox_files:
 			if (dropbox_file['dropbox_size'] == 0):
 				# SKIP - it is a folder
@@ -86,6 +88,7 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 				if len(search_result) < 1:
 					logger.warning("Not found in search (%s)",dropbox_file['dropbox_filename'])
 					merge = dropbox_file # copy the dropbox dict, because even if no success in search, the dropbox file should go to merge
+					not_found.append(dropbox_file)
 				for result in search_result:
 					merge = dropbox_file # copy the dropbox dict, because even if no success in search, the dropbox file should go to merge
 					# normally there whill only be ONE result
@@ -96,37 +99,21 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 					# logger.debug('Merged element: %s',merge)
 					keys = list(set(merge.keys() + keys))
 
-		# Write merged file to csv output
-		# sort keys before writing do cask file
+		# sort keys before writing do csvfile
 		keys = sorted(keys)
 
-		with stopwatch('write_csv'):
-			logger.info("writing %s lines from memory into CSV merged file",len(merged_files))
-			with open(merged_filename, 'w') as csvfile:
-				w = csv.DictWriter(csvfile, keys, encoding='utf-8')
-				w.writeheader()
+		# write to CSV file the merged analysed list
+		written_rows = write_dict_to_csv(merged_filename,merged_files,keys)
+		if written_rows > 0:
+			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
 
-				for item in merged_files:
-					w.writerow(item)
-		
+		# write to CSV file the merged analysed list
+		written_rows = write_dict_to_csv(notfound_filename,not_found,dropbox_files[0].keys())
+		if written_rows > 0:
+			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
+
 
 	return;
-
-# this method will return a list of dicts found comparing the name sith the content of the key
-def search(name, key, files):
-	logger.debug("searching '%s' value using key '%s'...",name,key)
-	return [element for element in files if element[key] == name]
-
-
-@contextlib.contextmanager
-def stopwatch(message):
-    """Context manager to print how long a block of code took."""
-    t0 = time.time()
-    try:
-        yield
-    finally:
-        t1 = time.time()
-        logger.info('Total elapsed time for %s: %.3f', message, t1 - t0)
 
 
 if __name__ == '__main__':
@@ -143,7 +130,6 @@ if __name__ == '__main__':
 
 	# # add handler to logger
 	logger.addHandler(streamHandler)
-
 	
 	# calls the main function
 	merge()
