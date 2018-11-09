@@ -1,11 +1,7 @@
 #!/usr/bin/python
 # encoding=utf8
 import sys
-import os
-import contextlib
-import datetime
-import time
-import unicodecsv as csv
+from util import *
 import logging
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -105,12 +101,12 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 		# write to CSV file the merged analysed list
 		written_rows = write_dict_to_csv(merged_filename,merged_files,keys)
 		if written_rows > 0:
-			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
+			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, merged_filename)
 
 		# write to CSV file the merged analysed list
 		written_rows = write_dict_to_csv(notfound_filename,not_found,dropbox_files[0].keys())
 		if written_rows > 0:
-			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
+			logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, notfound_filename)
 
 
 	return;
@@ -118,9 +114,9 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
-	# # create console handler and set level to debug
+	# # create console handler and set level
 	streamHandler = logging.StreamHandler()
 	streamHandler.setLevel(logging.INFO)
 	# # create formatter
