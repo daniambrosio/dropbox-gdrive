@@ -46,7 +46,7 @@ def gdrivereader():
 # this main method will get the files information from GDrive and save them on a CSV file
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
 	# # create console handler and set level to debug
 	streamHandler = logging.StreamHandler()
@@ -62,7 +62,8 @@ if __name__ == '__main__':
 	# calls the main function	
 	_dict = gdrivereader()
 
-	written_rows = write_dict_to_csv("gdrive.csv",_dict["files"],_dict["keys"])
+	csv_filename = "gdrive.csv"
+	written_rows = write_dict_to_csv(csv_filename,_dict["files"],_dict["keys"])
 	if written_rows > 0:
 		logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)
 

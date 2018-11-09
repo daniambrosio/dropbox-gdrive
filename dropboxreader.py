@@ -14,7 +14,7 @@ sys.setdefaultencoding('utf8')
 
 
 # this method will run calling Dropbox to get a list of files and return list of dict containing all the file information retrieved
-def dropboxreader(csv_filename = "dropbox.csv"):
+def dropboxreader():
 	# Will read the Dropbox token from a configuration file
 	TOKEN = read_token("DROPBOX_TOKEN")
 
@@ -100,7 +100,7 @@ def list_folder(dbx, folder='', subfolder=''):
 # this main method will get the files information from GDrive and save them on a CSV file
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
 	# # create console handler and set level to debug
 	streamHandler = logging.StreamHandler()
@@ -116,6 +116,7 @@ if __name__ == '__main__':
 	# calls the main function	
 	listing = dropboxreader()
 
+	csv_filename = "dropbox.csv"
 	written_rows = write_dict_to_csv(csv_filename,listing,listing[0].keys())
 	if written_rows > 0:
 		logger.info("Successfully written %s rows to CSV_FILE: %s", written_rows, csv_filename)

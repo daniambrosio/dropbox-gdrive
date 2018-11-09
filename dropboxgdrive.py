@@ -31,7 +31,7 @@ def stopwatch(message):
 
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.DEBUG)
+	logger.setLevel(logging.INFO)
 
 	# # create console handler and set level to debug
 	streamHandler = logging.StreamHandler()
