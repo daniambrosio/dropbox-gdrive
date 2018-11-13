@@ -75,6 +75,7 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 		keys = [] # list of keys in merged dict
 		not_found = [] # list of dropbox files not found in gdrive
 		for dropbox_file in dropbox_files:
+			logger.debug("Evaluating dropbox_file: %s", dropbox_file)
 			if (dropbox_file['dropbox_size'] == 0):
 				# SKIP - it is a folder
 				logger.warning("Skipping dropbox element for being a folder (0 bytes size): %s", dropbox_file['dropbox_filename'])
@@ -114,11 +115,11 @@ def merge(dropbox_filename = 'dropbox.csv', gdrive_filename = 'gdrive.csv', merg
 
 if __name__ == '__main__':
 	logger = logging.getLogger(__name__)
-	logger.setLevel(logging.INFO)
+	logger.setLevel(logging.DEBUG)
 
 	# # create console handler and set level
 	streamHandler = logging.StreamHandler()
-	streamHandler.setLevel(logging.INFO)
+	streamHandler.setLevel(logging.DEBUG)
 	# # create formatter
 	formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 	# # add formatter to ch
