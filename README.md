@@ -1,5 +1,13 @@
 # dropbox-gdrive
-Compare folders and their files in dropbox and google drive
+Compare folders and their files in dropbox and google drive. 
+The purpose of these python modules is to call APIs from Dropbox and Google Drive, in order to get a list of files from both services and compare them.
+
+As a matter of fact, it will consider dropbox as the base list and try to find those files in Google Drive.
+
+## Module files
+merge.py - This module will look in current directory for the csv files (dropbox.csv and gdrive.csv), load them, extract the important data and as a result will create two files cotaining the resulting analysis: *merged.csv* will contain all the files from dropbox that were found in gdrive and *notfound.csv* obsiously will contain the files that were not.
+
+
 
 # Setup Dropbox Python
 To install the DBX Platform Python SDK, from the Windows command line or a terminal session enter:
