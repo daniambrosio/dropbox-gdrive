@@ -5,8 +5,9 @@ The purpose of these python modules is to call APIs from Dropbox and Google Driv
 As a matter of fact, it will consider dropbox as the base list and try to find those files in Google Drive.
 
 ## Module files
-merge.py - This module will look in current directory for the csv files (dropbox.csv and gdrive.csv), load them, extract the important data and as a result will create two files cotaining the resulting analysis: *merged.csv* will contain all the files from dropbox that were found in gdrive and *notfound.csv* obsiously will contain the files that were not.
-
+**merge.py** - This module will look in current directory for the csv files (dropbox.csv and gdrive.csv), load them, extract the important data and as a result will create two files cotaining the resulting analysis: *merged.csv* will contain all the files from dropbox that were found in gdrive and *notfound.csv* obsiously will contain the files that were not.
+**dropboxreader.py** - This module will connect to dropbox using the provided key and generate the dropbox.csv containing all the files and their data.
+**gdrivereader.py** - This module will connect to Google Drive after opening a browser for authentication and generate the gdrive.csv containing all the files and their data.
 
 
 # Setup Dropbox Python
