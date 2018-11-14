@@ -6,7 +6,12 @@ As a matter of fact, it will consider dropbox as the base list and try to find t
 
 ## Module files
 **merge.py** - This module will look in current directory for the csv files (dropbox.csv and gdrive.csv), load them, extract the important data and as a result will create two files cotaining the resulting analysis: *merged.csv* will contain all the files from dropbox that were found in gdrive and *notfound.csv* obsiously will contain the files that were not.
+
 **dropboxreader.py** - This module will connect to dropbox using the provided key and generate the dropbox.csv containing all the files and their data.
+This module will look for a file named dropbox-gdrive.keys that should have the following format and the generated dropbox key:
+[TOKENS]
+DROPBOX_TOKEN = wWERASDFTfAAAAQBm2yRcmKT9Gf-G2CpJZl4xTs-29384saSADF-1YWJQlm5Rv
+
 **gdrivereader.py** - This module will connect to Google Drive after opening a browser for authentication and generate the gdrive.csv containing all the files and their data.
 
 
