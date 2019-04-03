@@ -21,7 +21,7 @@ To install the DBX Platform Python SDK, from the Windows command line or a termi
 pip install dropbox
 
 
-[Dropbox for Python Documentation | https://dropbox-sdk-python.readthedocs.io/en/latest/]
+[Dropbox for Python Documentation](https://dropbox-sdk-python.readthedocs.io/en/latest/)
 
 
 # Google Drive
